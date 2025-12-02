@@ -1,7 +1,5 @@
 package com.nextinvest.backend.config;
 
-import com.nextinvest.backend.service.CustomUserDetailsService;
-import com.nextinvest.backend.service.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +17,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
+
+import com.nextinvest.backend.service.CustomUserDetailsService;
+import com.nextinvest.backend.service.JwtFilter;
 
 @Configuration
 public class SecurityConfig {
@@ -39,19 +39,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Use our CORS config
             .authorizeHttpRequests(auth -> auth
-                // --- PUBLIC ENDPOINTS ---
-                // Allow getting ALL offerings OR a SPECIFIC offering (/**)
-                .requestMatchers(HttpMethod.GET, "/api/offerings/**").permitAll() 
-                
-                // Allow subscribing to newsletter
-                .requestMatchers(HttpMethod.POST, "/api/newsletter").permitAll() 
-                
-                // Allow Login
-                .requestMatchers("/api/auth/**").permitAll() 
-                
-                // --- PRIVATE ENDPOINTS (Everything else requires Login) ---
+                .requestMatchers(HttpMethod.GET, "/api/offerings/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/newsletter").permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -78,25 +70,16 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
-@Bean
-    public CorsFilter corsFilter() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        // CHANGE: Use addAllowedOriginPattern("*") to allow Render frontend
-        config.addAllowedOriginPattern("*"); 
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
-        source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
-    }
-    
+
+    /**
+     * Single CORS configuration for the backend
+     */
     private UrlBasedCorsConfigurationSource corsConfigurationSource() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        // CHANGE: Use addAllowedOriginPattern("*") here too
-        config.addAllowedOriginPattern("*");
+        // Only allow your frontend URL
+        config.addAllowedOrigin("https://investplatform-flipr.onrender.com");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/**", config);
