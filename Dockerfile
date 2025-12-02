@@ -10,4 +10,4 @@ WORKDIR /app
 COPY --from=build /app/target/backend-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
 # The fix is in the line below: forcing IPv4
-ENTRYPOINT ["java", "-Djava.net.preferIPv4Stack=true", "-jar", "app.jar"]
+ENTRYPOINT ["java","-jar","app.jar"]
