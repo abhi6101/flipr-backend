@@ -9,7 +9,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://localhost:5173")
+// CHANGE: Allow all origins so Render frontend can fetch data
+@CrossOrigin(origins = "*")
 public class OfferingController {
 
     @Autowired
@@ -21,7 +22,7 @@ public class OfferingController {
         return repository.findAll();
     }
 
-    // 2. NEW: Get Single Offering by ID (For Details Page)
+    // 2. Get Single Offering by ID
     @GetMapping("/offerings/{id}")
     public Offering getOfferingById(@PathVariable Long id) {
         return repository.findById(id)
