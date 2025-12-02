@@ -9,7 +9,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/newsletter")
-@CrossOrigin(origins = "http://localhost:5173")
+// CHANGE: Allow all origins so the live site can send emails
+@CrossOrigin(origins = "*")
 public class SubscriberController {
 
     @Autowired
@@ -27,7 +28,7 @@ public class SubscriberController {
         return repository.findAll();
     }
 
-    // 3. Delete Subscriber (Admin) - NEW!
+    // 3. Delete Subscriber (Admin)
     @DeleteMapping("/{id}")
     public void deleteSubscriber(@PathVariable Long id) {
         repository.deleteById(id);
