@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:5173")
+// CHANGE: Allow all origins so Render frontend can login
+@CrossOrigin(origins = "*") 
 public class AuthController {
 
     @Autowired
