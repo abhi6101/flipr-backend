@@ -41,10 +41,14 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
+                // FIX: Render Health Check को पास करने के लिए Actuator एंडपॉइंट को सार्वजनिक करें
+                .requestMatchers("/actuator/**").permitAll() // <-- यह महत्वपूर्ण बदलाव है!
+                
                 // PUBLIC endpoints
                 .requestMatchers(HttpMethod.GET, "/api/offerings/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/newsletter").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
+                
                 // PRIVATE endpoints
                 .anyRequest().authenticated()
             )
@@ -73,7 +77,7 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    // CORS Configuration
+    // CORS Configuration (Updated to use RequestMatchers for Spring Security)
     @Bean
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
