@@ -1,5 +1,7 @@
 package com.nextinvest.backend.config;
 
+import com.nextinvest.backend.service.CustomUserDetailsService;
+import com.nextinvest.backend.service.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,9 +19,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import com.nextinvest.backend.service.CustomUserDetailsService;
-import com.nextinvest.backend.service.JwtFilter;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 public class SecurityConfig {
@@ -39,11 +39,13 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Use our CORS config
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
+                // PUBLIC endpoints
                 .requestMatchers(HttpMethod.GET, "/api/offerings/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/newsletter").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
+                // PRIVATE endpoints
                 .anyRequest().authenticated()
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -71,14 +73,24 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    /**
-     * Single CORS configuration for the backend
-     */
+    // CORS Configuration
+    @Bean
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        // Replace with your frontend URL
+        config.addAllowedOrigin("https://investplatform-flipr.onrender.com");
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        source.registerCorsConfiguration("/**", config);
+        return new CorsFilter(source);
+    }
+
     private UrlBasedCorsConfigurationSource corsConfigurationSource() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        // Only allow your frontend URL
         config.addAllowedOrigin("https://investplatform-flipr.onrender.com");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
